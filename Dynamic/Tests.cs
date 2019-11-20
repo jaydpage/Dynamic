@@ -33,6 +33,21 @@ namespace Dynamic
             Assert.AreEqual(typeof(int), d.GetType());
         }
 
+        public class TheThing { }
+
+        [Test]
+        public void ShouldAllowReAssignmentOfComplexTypes()
+        {
+            // Arrange
+            dynamic d = new DoSomethingUseful();
+            // Pre-Assert
+            Assert.AreEqual(typeof(DoSomethingUseful),d.GetType());
+            // Act
+            d = new TheThing();
+            // Assert
+            Assert.AreEqual(typeof(TheThing), d.GetType());
+        }
+
         [Test]
         public void InvalidOperationOnDerivedTypeShouldThrow()
         {
