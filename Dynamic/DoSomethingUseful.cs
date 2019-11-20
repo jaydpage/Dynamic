@@ -4,12 +4,15 @@ namespace Dynamic
 {
     public class DoSomethingUseful : IDoSomethingUseful
     {
-        public void Execute(int value) { }
+        public object Execute(dynamic value)
+        {
+            return value;
+        }
     }
 
     public interface IDoSomethingUseful
     {
-        void Execute(int value);
+        object Execute(dynamic value);
     }
 
     public class DoSomethingUsefulDataBuilder

@@ -2,7 +2,6 @@ using System;
 using System.Dynamic;
 using FluentAssertions;
 using Microsoft.CSharp.RuntimeBinder;
-using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReceivedExtensions;
 using NUnit.Framework;
 
@@ -35,7 +34,7 @@ namespace Dynamic
         }
 
         [Test]
-        public void InvalidOperationForDerivedTypeShouldThrow()
+        public void InvalidOperationOnDerivedTypeShouldThrow()
         {
             // Arrange
             dynamic d = "test";
@@ -46,26 +45,46 @@ namespace Dynamic
                 .WithMessage("Operator '++' cannot be applied to operand of type 'string'");
         }
 
-        public class TheThing
+        [Test]
+        public void ShouldAllowImplicitConversion()
         {
+            // Arrange
+            dynamic d = DateTime.Now;
+            // Act
+            DateTime t = d;
+            d += new TimeSpan(0, 2, 0, 0);
+            // Assert
+            Assert.AreEqual(t.AddHours(2), d);
         }
 
         [Test]
         public void ShouldThrowRuntimeExceptionWhenCallingMethodThatDoesNotExist()
         {
             // Arrange
-            dynamic thing = new TheThing();
+            dynamic something = new DoSomethingUseful();
             // Act
             try
             {
-                thing.SomeMethodThatDoesNotExist();
+                something.SomeMethodThatDoesNotExist();
             }
             catch (Exception e)
             {
                 // Assert
                 e.Message.Should()
-                    .Be("'Dynamic.Tests.TheThing' does not contain a definition for 'SomeMethodThatDoesNotExist'");
+                    .Be("'Dynamic.DoSomethingUseful' does not contain a definition for 'SomeMethodThatDoesNotExist'");
             }
+        }
+
+        [Test]
+        public void ShouldAllowDynamicAsParameter()
+        {
+            // Arrange
+            var value = 5;
+            var something = new DoSomethingUseful();
+            // Act
+            var result = something.Execute(value);
+            // Assert
+            result.Should().Be(value);
         }
 
         [Test]
