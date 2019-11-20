@@ -2,6 +2,7 @@ using System;
 using System.Dynamic;
 using FluentAssertions;
 using Microsoft.CSharp.RuntimeBinder;
+using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReceivedExtensions;
 using NUnit.Framework;
 
@@ -45,18 +46,41 @@ namespace Dynamic
                 .WithMessage("Operator '++' cannot be applied to operand of type 'string'");
         }
 
+        public class TheThing
+        {
+        }
+
+        [Test]
+        public void ShouldThrowRuntimeExceptionWhenCallingMethodThatDoesNotExist()
+        {
+            // Arrange
+            dynamic thing = new TheThing();
+            // Act
+            try
+            {
+                thing.SomeMethodThatDoesNotExist();
+            }
+            catch (Exception e)
+            {
+                // Assert
+                e.Message.Should()
+                    .Be("'Dynamic.Tests.TheThing' does not contain a definition for 'SomeMethodThatDoesNotExist'");
+            }
+        }
+
         [Test]
         public void ShouldAllowForExpandoObjects()
         {
             // Arrange
             var somethingUseful = new DoSomethingUsefulDataBuilder().Build();
             const int theNumber = 123;
-
             dynamic expando = new ExpandoObject();
             expando.SampleProperty = theNumber;
-            expando.SampleMethod = (Action)(() => somethingUseful.Execute(expando.SampleProperty));
+            expando.SampleMethod = (Action) (() => somethingUseful.Execute(expando.SampleProperty));
+
             // Act
             expando.SampleMethod();
+
             // Assert
             somethingUseful.Received(Quantity.Exactly(1)).Execute(theNumber);
         }
